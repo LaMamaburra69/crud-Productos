@@ -1,6 +1,7 @@
 # CRUD de Productos con Spring Boot
 
-API REST básica (Java 17, Spring Boot 3, Spring Data JPA, H2).
+API REST + interfaz web (Java 17, Spring Boot 3, Spring Data JPA).
+Usa H2 en memoria en desarrollo y MySQL cuando se ejecuta con Docker.
 
 ## Estructura
 
@@ -8,49 +9,52 @@ API REST básica (Java 17, Spring Boot 3, Spring Data JPA, H2).
 src/main/java/com/ejemplo/crud
 ├── CrudApplication.java
 ├── controller/   -> endpoints REST
-├── service/      -> lógica de negocio
+├── service/      -> logica de negocio
 ├── repository/   -> acceso a datos (JPA)
 ├── model/        -> entidad Producto
 └── exception/    -> manejo de errores
+src/main/resources
+├── application.properties         -> perfil por defecto (H2)
+├── application-mysql.properties   -> perfil MySQL
+└── static/index.html              -> interfaz web
 ```
 
-## Ejecutar
+## Ejecutar con Docker (MySQL)
+
+Requiere Docker Desktop.
 
 ```bash
-mvn spring-boot:run
+docker compose up --build
 ```
 
-La API queda en `http://localhost:8080/api/productos`.
+Abrir `http://localhost:8080/`. Los datos se guardan en un volumen de Docker
+y se conservan al detener y volver a iniciar.
+
+| Comando                     | Que hace                                          |
+|-----------------------------|---------------------------------------------------|
+| `docker compose up --build` | Construye y arranca (usar tras cambiar codigo)    |
+| `docker compose up`         | Arranca sin reconstruir                           |
+| `docker compose down`       | Detiene y elimina los contenedores (conserva datos) |
+| `docker compose down -v`    | Igual, pero BORRA tambien los datos de MySQL      |
+
+MySQL tambien queda disponible en `localhost:3307`
+(base `productosdb`, usuario `productos`, clave `productos123`).
+Estas credenciales son solo para desarrollo local.
+
+## Ejecutar sin Docker (H2)
+
+Ejecutar `CrudApplication` desde IntelliJ o con `mvn spring-boot:run`.
+Los datos se borran al detener la aplicacion.
 
 ## Endpoints
 
-| Método | URL                    | Descripción          |
+| Metodo | URL                    | Descripcion          |
 |--------|------------------------|----------------------|
 | GET    | /api/productos         | Listar todos         |
 | GET    | /api/productos/{id}    | Obtener por id       |
 | POST   | /api/productos         | Crear                |
 | PUT    | /api/productos/{id}    | Actualizar           |
 | DELETE | /api/productos/{id}    | Eliminar             |
-
-## Ejemplos con curl
-
-```bash
-# Crear
-curl -X POST http://localhost:8080/api/productos \
-  -H "Content-Type: application/json" \
-  -d '{"nombre":"Mouse","descripcion":"Inalámbrico","precio":45000,"stock":25}'
-
-# Listar
-curl http://localhost:8080/api/productos
-
-# Actualizar
-curl -X PUT http://localhost:8080/api/productos/1 \
-  -H "Content-Type: application/json" \
-  -d '{"nombre":"Mouse Pro","descripcion":"Ergonómico","precio":60000,"stock":20}'
-
-# Eliminar
-curl -X DELETE http://localhost:8080/api/productos/1
-```
 
 ## Tests
 

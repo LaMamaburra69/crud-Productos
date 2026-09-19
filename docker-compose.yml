@@ -1,7 +1,42 @@
 services:
+  db:
+    image: mysql:8.4
+    container_name: crud-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root123}
+      MYSQL_DATABASE: productosdb
+      MYSQL_USER: ${DB_USER:-productos}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-productos123}
+    ports:
+      # 3307 en tu computador -> 3306 dentro del contenedor.
+      # Sirve para conectarte con IntelliJ u otro programa sin chocar con un MySQL local.
+      - "3307:3306"
+    volumes:
+      # Guarda los datos fuera del contenedor para que no se pierdan al apagarlo
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
   app:
     build: .
     container_name: crud-productos
+    depends_on:
+      db:
+        condition: service_healthy   # la app espera a que MySQL este listo
+    environment:
+      SPRING_PROFILES_ACTIVE: mysql
+      DB_HOST: db                    # "db" es el nombre del servicio de arriba
+      DB_PORT: 3306
+      DB_NAME: productosdb
+      DB_USER: ${DB_USER:-productos}
+      DB_PASSWORD: ${DB_PASSWORD:-productos123}
     ports:
       - "8080:8080"
     restart: unless-stopped
+
+volumes:
+  mysql_data:
