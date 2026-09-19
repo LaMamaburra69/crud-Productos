@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inventario de productos</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #EDF1F2;
+    --surface: #FFFFFF;
+    --ink: #0F1E24;
+    --muted: #586A72;
+    --line: #D5DDE0;
+    --riel: #E1E8EA;
+    --acento: #0E5A6B;
+    --acento-ink: #FFFFFF;
+    --acento-suave: #DCEBEE;
+    --aviso: #A84800;
+    --aviso-barra: #F08A24;
+    --peligro: #B3261E;
+    --peligro-suave: #FBE5E3;
+    --titulos: "Bahnschrift", "DIN Alternate", "Arial Narrow", "Segoe UI", system-ui, sans-serif;
+    --texto: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0D191E;
+      --surface: #14252C;
+      --ink: #E6EEF0;
+      --muted: #93A6AD;
+      --line: #263A41;
+      --riel: #1F343B;
+      --acento: #55B8CD;
+      --acento-ink: #06252C;
+      --acento-suave: #1B3A44;
+      --aviso: #F2A652;
+      --aviso-barra: #F2A652;
+      --peligro: #F4837B;
+      --peligro-suave: #3A1F1E;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--texto);
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--acento);
+    outline-offset: 2px;
+  }
+
+  .sr {
+    position: absolute;
+    width: 1px; height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .wrap {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 40px 24px 96px;
+  }
+
+  /* Encabezado */
+  .top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 16px 24px;
+    flex-wrap: wrap;
+  }
+
+  h1 {
+    margin: 0;
+    font-family: var(--titulos);
+    font-size: clamp(2.1rem, 5vw, 3rem);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1.05;
+  }
+
+  .resumen {
+    margin: 8px 0 0;
+    color: var(--muted);
+    max-width: 72ch;
+    min-height: 1.5em;
+  }
+  .resumen strong {
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .enlace {
+    background: none;
+    border: 0;
+    padding: 0;
+    font: inherit;
+    font-weight: 600;
+    color: var(--acento);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+  }
+
+  /* Botones */
+  .btn {
+    height: 44px;
+    padding: 0 18px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--ink);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .btn:hover { border-color: var(--muted); }
+  .btn.primario {
+    background: var(--acento);
+    border-color: var(--acento);
+    color: var(--acento-ink);
+  }
+  .btn.primario:hover { filter: brightness(1.1); }
+  .btn.borrar {
+    background: var(--peligro);
+    border-color: var(--peligro);
+    color: #fff;
+  }
+  @media (prefers-color-scheme: dark) {
+    .btn.borrar { color: #2B0F0D; }
+  }
+  .btn:disabled { opacity: .6; cursor: not-allowed; }
+
+  /* Barra de búsqueda y filtros */
+  .barra {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 28px 0 16px;
+  }
+
+  input[type="search"],
+  .campo input {
+    width: 100%;
+    height: 44px;
+    padding: 0 14px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--ink);
+    font: inherit;
+  }
+  input:focus-visible { outline-offset: 0; border-color: var(--acento); }
+  input::placeholder { color: var(--muted); }
+
+  .buscar { flex: 1 1 260px; }
+
+  .filtros {
+    display: inline-flex;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface);
+    padding: 3px;
+    gap: 3px;
+  }
+  .filtros button {
+    height: 36px;
+    padding: 0 16px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--muted);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .filtros button[aria-pressed="true"] {
+    background: var(--acento-suave);
+    color: var(--acento);
+  }
+
+  /* Aviso de error de conexión */
+  .aviso {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+    padding: 12px 16px;
+    border: 1px solid var(--peligro);
+    border-radius: 8px;
+    background: var(--peligro-suave);
+    color: var(--peligro);
+    font-weight: 600;
+  }
+  .aviso .btn { height: 36px; }
+
+  /* Tabla */
+  .tabla-wrap {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  table { width: 100%; border-collapse: collapse; }
+
+  th {
+    padding: 12px 16px;
+    text-align: left;
+    font-size: .875rem;
+    font-weight: 600;
+    color: var(--muted);
+    border-bottom: 1px solid var(--line);
+  }
+  th.num { text-align: right; }
+  th .orden {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0;
+    background: none;
+    border: 0;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+  }
+  th .orden:hover { color: var(--ink); }
+  th[aria-sort="ascending"], th[aria-sort="descending"] { color: var(--ink); }
+  th[aria-sort="ascending"] .flecha::after { content: "\2191"; }
+  th[aria-sort="descending"] .flecha::after { content: "\2193"; }
+
+  td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: middle;
+  }
+  tr:last-child td { border-bottom: 0; }
+
+  .nombre { display: block; font-weight: 600; }
+  .desc {
+    display: block;
+    max-width: 38ch;
+    color: var(--muted);
+    font-size: .875rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .c-precio {
+    text-align: right;
+    white-space: nowrap;
+    font-family: var(--titulos);
+    font-size: 1.05rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Stock: cantidad + riel que muestra cuánto queda en la estantería */
+  .stock { display: flex; align-items: center; gap: 12px; }
+  .cant {
+    min-width: 3ch;
+    text-align: right;
+    font-family: var(--titulos);
+    font-size: 1.05rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .riel {
+    flex: 0 0 110px;
+    height: 8px;
+    border-radius: 4px;
+    background: var(--riel);
+    overflow: hidden;
+  }
+  .relleno {
+    display: block;
+    height: 100%;
+    border-radius: 4px;
+    background: var(--acento);
+  }
+  .tag { font-size: .8125rem; font-weight: 600; }
+  .stock.poco .relleno { background: var(--aviso-barra); }
+  .stock.poco .tag { color: var(--aviso); }
+  .stock.agotado .cant,
+  .stock.agotado .tag { color: var(--peligro); }
+
+  .c-acc { text-align: right; white-space: nowrap; }
+  .link {
+    padding: 8px 10px;
+    border: 0;
+    border-radius: 6px;
+    background: none;
+    color: var(--acento);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .link:hover { background: var(--acento-suave); }
+  .link.peligro { color: var(--peligro); }
+  .link.peligro:hover { background: var(--peligro-suave); }
+
+  @keyframes destello {
+    from { background: var(--acento-suave); }
+    to { background: transparent; }
+  }
+  tr.destacado td { animation: destello 1.8s ease-out; }
+
+  /* Estados vacíos */
+  .vacio { padding: 56px 24px; text-align: center; }
+  .vacio h2 {
+    margin: 0 0 6px;
+    font-family: var(--titulos);
+    font-size: 1.5rem;
+  }
+  .vacio p { margin: 0 0 20px; color: var(--muted); }
+  .vacio .vacio-texto { margin: 0; }
+
+  /* Ventanas de diálogo */
+  dialog {
+    width: min(480px, calc(100vw - 32px));
+    padding: 0;
+    border: 0;
+    border-radius: 12px;
+    background: var(--surface);
+    color: var(--ink);
+    box-shadow: 0 24px 64px rgba(0, 0, 0, .3);
+  }
+  dialog::backdrop { background: rgba(8, 22, 27, .55); }
+  dialog[open] { animation: entrar .18s ease-out; }
+  @keyframes entrar {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: none; }
+  }
+
+  dialog form { padding: 24px; }
+  dialog h2 {
+    margin: 0 0 18px;
+    font-family: var(--titulos);
+    font-size: 1.5rem;
+    line-height: 1.2;
+  }
+  dialog p.texto { margin: 0 0 4px; color: var(--muted); }
+
+  .campo { margin-bottom: 16px; }
+  .campo label { display: block; margin-bottom: 6px; font-weight: 600; font-size: .9375rem; }
+  .campo .opcional { color: var(--muted); font-weight: 400; }
+  .campo input[aria-invalid="true"] { border-color: var(--peligro); }
+  .fila2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .error {
+    margin: 6px 0 0;
+    color: var(--peligro);
+    font-size: .875rem;
+    font-weight: 600;
+  }
+  .error:empty { display: none; }
+
+  .acciones {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+  }
+
+  /* Mensajes emergentes */
+  .toasts {
+    position: fixed;
+    left: 0; right: 0; bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 0 16px;
+    pointer-events: none;
+  }
+  .toast {
+    padding: 12px 20px;
+    border-radius: 8px;
+    background: var(--ink);
+    color: var(--bg);
+    font-weight: 600;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .25);
+    animation: entrar .2s ease-out;
+  }
+
+  /* Móvil: cada fila se convierte en una ficha apilada */
+  @media (max-width: 680px) {
+    .wrap { padding: 28px 16px 80px; }
+    thead { display: none; }
+    table, tbody { display: block; }
+    tr {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 6px 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+    }
+    tr:last-child { border-bottom: 0; }
+    td { display: block; padding: 0; border: 0; }
+    .c-nombre { grid-column: 1; grid-row: 1; }
+    .c-precio { grid-column: 2; grid-row: 1; }
+    .c-stock { grid-column: 1 / -1; }
+    .c-acc { grid-column: 1 / -1; text-align: left; margin-left: -10px; }
+    .desc { white-space: normal; max-width: none; }
+    .filtros { width: 100%; }
+    .filtros button { flex: 1; padding: 0 8px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<main class="wrap">
+  <header class="top">
+    <div>
+      <h1>Inventario</h1>
+      <p id="resumen" class="resumen" aria-live="polite"></p>
+    </div>
+    <button type="button" id="btnNuevo" class="btn primario">Nuevo producto</button>
+  </header>
+
+  <div class="barra">
+    <div class="buscar">
+      <label for="q" class="sr">Buscar producto</label>
+      <input id="q" type="search" placeholder="Buscar por nombre o descripción" autocomplete="off">
+    </div>
+    <div class="filtros" role="group" aria-label="Filtrar por stock">
+      <button type="button" data-filtro="todos" aria-pressed="true">Todos</button>
+      <button type="button" data-filtro="reponer" aria-pressed="false">Por reponer</button>
+    </div>
+  </div>
+
+  <div id="aviso" class="aviso" role="alert" hidden>
+    <span>No se pudo conectar con el servidor. Comprueba que la aplicación siga en ejecución.</span>
+    <button type="button" id="btnReintentar" class="btn">Reintentar</button>
+  </div>
+
+  <div class="tabla-wrap">
+    <table id="tabla" hidden>
+      <caption class="sr">Lista de productos</caption>
+      <thead>
+        <tr>
+          <th data-col="nombre" aria-sort="ascending"><button type="button" class="orden" data-orden="nombre">Producto <span class="flecha" aria-hidden="true"></span></button></th>
+          <th data-col="precio" class="num" aria-sort="none"><button type="button" class="orden" data-orden="precio">Precio <span class="flecha" aria-hidden="true"></span></button></th>
+          <th data-col="stock" aria-sort="none"><button type="button" class="orden" data-orden="stock">Stock <span class="flecha" aria-hidden="true"></span></button></th>
+          <th><span class="sr">Acciones</span></th>
+        </tr>
+      </thead>
+      <tbody id="filas"></tbody>
+    </table>
+    <div id="vacio" class="vacio" hidden></div>
+  </div>
+</main>
+
+<!-- Crear y editar -->
+<dialog id="dlgForm" aria-labelledby="formTitulo">
+  <form id="form" novalidate>
+    <h2 id="formTitulo">Nuevo producto</h2>
+
+    <div class="campo">
+      <label for="f-nombre">Nombre</label>
+      <input id="f-nombre" name="nombre" maxlength="100" autocomplete="off" aria-describedby="e-nombre" autofocus>
+      <p class="error" id="e-nombre"></p>
+    </div>
+
+    <div class="campo">
+      <label for="f-descripcion">Descripción <span class="opcional">(opcional)</span></label>
+      <input id="f-descripcion" name="descripcion" maxlength="255" autocomplete="off" aria-describedby="e-descripcion">
+      <p class="error" id="e-descripcion"></p>
+    </div>
+
+    <div class="fila2">
+      <div class="campo">
+        <label for="f-precio">Precio (COP)</label>
+        <input id="f-precio" name="precio" type="number" min="0" step="any" inputmode="decimal" aria-describedby="e-precio">
+        <p class="error" id="e-precio"></p>
+      </div>
+      <div class="campo">
+        <label for="f-stock">Stock</label>
+        <input id="f-stock" name="stock" type="number" min="0" step="1" inputmode="numeric" aria-describedby="e-stock">
+        <p class="error" id="e-stock"></p>
+      </div>
+    </div>
+
+    <p class="error" id="e-general" role="alert"></p>
+
+    <div class="acciones">
+      <button type="button" class="btn" id="btnCancelar">Cancelar</button>
+      <button type="submit" class="btn primario" id="btnGuardar">Crear producto</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Confirmar eliminación -->
+<dialog id="dlgBorrar" aria-labelledby="borrarTitulo">
+  <form method="dialog" onsubmit="return false">
+    <h2 id="borrarTitulo">¿Eliminar este producto?</h2>
+    <p class="texto" id="borrarTexto"></p>
+    <p class="error" id="e-borrar" role="alert"></p>
+    <div class="acciones">
+      <button type="button" class="btn" id="btnCancelarBorrar">Cancelar</button>
+      <button type="button" class="btn borrar" id="btnConfirmarBorrar">Eliminar producto</button>
+    </div>
+  </form>
+</dialog>
+
+<div id="toasts" class="toasts" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+  'use strict';
+
+  const API = '/api/productos';
+  const POCO_STOCK = 5; // desde este valor hacia abajo se considera "por reponer"
+
+  const $ = (s) => document.querySelector(s);
+  const el = {
+    resumen: $('#resumen'),
+    aviso: $('#aviso'),
+    tabla: $('#tabla'),
+    filas: $('#filas'),
+    vacio: $('#vacio'),
+    buscar: $('#q'),
+    dlgForm: $('#dlgForm'),
+    form: $('#form'),
+    dlgBorrar: $('#dlgBorrar'),
+    toasts: $('#toasts'),
+  };
+
+  const moneda = new Intl.NumberFormat('es-CO', {
+    style: 'currency',
+    currency: 'COP',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  });
+
+  const estado = {
+    productos: [],
+    cargando: true,
+    error: false,
+    q: '',
+    filtro: 'todos',
+    orden: { campo: 'nombre', dir: 'asc' },
+    editandoId: null,
+    borrarId: null,
+    destacarId: null,
+  };
+
+  const esc = (t) => String(t ?? '').replace(/[&<>"']/g, (c) => (
+    { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+  ));
+
+  /* ---------- Comunicación con la API ---------- */
+
+  async function pedir(url, opciones = {}) {
+    let resp;
+    try {
+      resp = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...opciones });
+    } catch (e) {
+      throw { tipo: 'red' };
+    }
+    if (resp.status === 204) return null;
+    let cuerpo = null;
+    try { cuerpo = await resp.json(); } catch (e) { /* sin cuerpo JSON */ }
+    if (!resp.ok) throw { tipo: 'http', status: resp.status, cuerpo };
+    return cuerpo;
+  }
+
+  async function cargar() {
+    estado.cargando = true;
+    estado.error = false;
+    render();
+    try {
+      estado.productos = await pedir(API);
+    } catch (e) {
+      estado.error = true;
+    }
+    estado.cargando = false;
+    render();
+  }
+
+  /* ---------- Filtros y orden ---------- */
+
+  function visibles() {
+    const q = estado.q.trim().toLowerCase();
+    const lista = estado.productos.filter((p) => {
+      if (estado.filtro === 'reponer' && p.stock > POCO_STOCK) return false;
+      if (q) {
+        const texto = (p.nombre + ' ' + (p.descripcion || '')).toLowerCase();
+        if (!texto.includes(q)) return false;
+      }
+      return true;
+    });
+    const { campo, dir } = estado.orden;
+    const signo = dir === 'asc' ? 1 : -1;
+    lista.sort((a, b) => (
+      campo === 'nombre'
+        ? signo * a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' })
+        : signo * (a[campo] - b[campo])
+    ));
+    return lista;
+  }
+
+  /* ---------- Dibujo ---------- */
+
+  function render() {
+    renderResumen();
+    renderFiltros();
+    renderOrden();
+    el.aviso.hidden = !estado.error;
+    renderLista();
+  }
+
+  function renderResumen() {
+    if (estado.cargando) { el.resumen.textContent = 'Cargando productos…'; return; }
+    if (estado.error) { el.resumen.textContent = ''; return; }
+    const n = estado.productos.length;
+    if (n === 0) { el.resumen.textContent = 'Todavía no has registrado productos.'; return; }
+    const valor = estado.productos.reduce((suma, p) => suma + p.precio * p.stock, 0);
+    const reponer = estado.productos.filter((p) => p.stock <= POCO_STOCK).length;
+    let html = `<strong>${n}</strong> ${n === 1 ? 'producto' : 'productos'} en inventario, valorados en <strong>${esc(moneda.format(valor))}</strong>.`;
+    if (reponer > 0) {
+      html += ` Hay <button type="button" class="enlace" data-ir="reponer">${reponer} ${reponer === 1 ? 'producto' : 'productos'} por reponer</button>.`;
+    }
+    el.resumen.innerHTML = html;
+  }
+
+  function renderFiltros() {
+    document.querySelectorAll('[data-filtro]').forEach((b) => {
+      b.setAttribute('aria-pressed', String(b.dataset.filtro === estado.filtro));
+    });
+  }
+
+  function renderOrden() {
+    document.querySelectorAll('th[data-col]').forEach((th) => {
+      const activo = th.dataset.col === estado.orden.campo;
+      th.setAttribute('aria-sort', activo ? (estado.orden.dir === 'asc' ? 'ascending' : 'descending') : 'none');
+    });
+  }
+
+  function filaHTML(p, maxStock) {
+    const pct = Math.min(100, Math.round((p.stock / maxStock) * 100));
+    let clase = '';
+    let etiqueta = '';
+    if (p.stock === 0) { clase = 'agotado'; etiqueta = 'Agotado'; }
+    else if (p.stock <= POCO_STOCK) { clase = 'poco'; etiqueta = 'Poco stock'; }
+    const nombre = esc(p.nombre);
+    return `
+      <tr data-id="${p.id}" class="${p.id === estado.destacarId ? 'destacado' : ''}">
+        <td class="c-nombre">
+          <span class="nombre">${nombre}</span>
+          ${p.descripcion ? `<span class="desc" title="${esc(p.descripcion)}">${esc(p.descripcion)}</span>` : ''}
+        </td>
+        <td class="c-precio">${esc(moneda.format(p.precio))}</td>
+        <td class="c-stock">
+          <div class="stock ${clase}">
+            <span class="cant">${p.stock}</span>
+            <span class="riel" aria-hidden="true"><span class="relleno" style="width:${pct}%"></span></span>
+            ${etiqueta ? `<span class="tag">${etiqueta}</span>` : ''}
+          </div>
+        </td>
+        <td class="c-acc">
+          <button type="button" class="link" data-accion="editar" aria-label="Editar ${nombre}">Editar</button>
+          <button type="button" class="link peligro" data-accion="borrar" aria-label="Eliminar ${nombre}">Eliminar</button>
+        </td>
+      </tr>`;
+  }
+
+  function renderLista() {
+    el.vacio.hidden = true;
+    el.tabla.hidden = true;
+    if (estado.error) return;
+
+    if (estado.cargando) {
+      el.vacio.hidden = false;
+      el.vacio.innerHTML = '<p class="vacio-texto">Cargando productos…</p>';
+      return;
+    }
+    if (estado.productos.length === 0) {
+      el.vacio.hidden = false;
+      el.vacio.innerHTML = `
+        <h2>Aún no hay productos</h2>
+        <p>Crea el primero para empezar a controlar tu stock.</p>
+        <button type="button" class="btn primario" data-accion="nuevo">Nuevo producto</button>`;
+      return;
+    }
+    const lista = visibles();
+    if (lista.length === 0) {
+      el.vacio.hidden = false;
+      el.vacio.innerHTML = `
+        <h2>Ningún producto coincide</h2>
+        <p>Prueba con otro nombre o quita los filtros.</p>
+        <button type="button" class="btn" data-accion="limpiar">Quitar filtros</button>`;
+      return;
+    }
+    const maxStock = Math.max(10, ...estado.productos.map((p) => p.stock));
+    el.filas.innerHTML = lista.map((p) => filaHTML(p, maxStock)).join('');
+    el.tabla.hidden = false;
+    estado.destacarId = null;
+  }
+
+  function toast(mensaje) {
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.textContent = mensaje;
+    el.toasts.appendChild(t);
+    setTimeout(() => t.remove(), 3500);
+  }
+
+  /* ---------- Formulario: crear y editar ---------- */
+
+  function limpiarErrores() {
+    el.form.querySelectorAll('.error').forEach((p) => { p.textContent = ''; });
+    el.form.querySelectorAll('[aria-invalid]').forEach((i) => i.removeAttribute('aria-invalid'));
+  }
+
+  function mostrarErrores(errores) {
+    Object.entries(errores).forEach(([campo, mensaje]) => {
+      const p = $('#e-' + campo);
+      const input = $('#f-' + campo);
+      if (p) p.textContent = mensaje;
+      else $('#e-general').textContent = mensaje;
+      if (input) input.setAttribute('aria-invalid', 'true');
+    });
+    const primero = el.form.querySelector('[aria-invalid="true"]');
+    if (primero) primero.focus();
+  }
+
+  function abrirForm(producto = null) {
+    estado.editandoId = producto ? producto.id : null;
+    $('#formTitulo').textContent = producto ? 'Editar producto' : 'Nuevo producto';
+    $('#btnGuardar').textContent = producto ? 'Guardar cambios' : 'Crear producto';
+    el.form.reset();
+    limpiarErrores();
+    if (producto) {
+      const f = el.form.elements;
+      f.nombre.value = producto.nombre;
+      f.descripcion.value = producto.descripcion ?? '';
+      f.precio.value = producto.precio;
+      f.stock.value = producto.stock;
+    }
+    el.dlgForm.showModal();
+  }
+
+  function validar(d) {
+    const e = {};
+    if (!d.nombre) e.nombre = 'El nombre es obligatorio';
+    else if (d.nombre.length > 100) e.nombre = 'El nombre no puede superar los 100 caracteres';
+    if (d.descripcion && d.descripcion.length > 255) e.descripcion = 'La descripción no puede superar los 255 caracteres';
+    if (d.precio === null || Number.isNaN(d.precio)) e.precio = 'El precio es obligatorio';
+    else if (!(d.precio > 0)) e.precio = 'El precio debe ser mayor que 0';
+    else if (Math.round(d.precio * 100) / 100 !== d.precio) e.precio = 'El precio admite hasta 2 decimales';
+    if (d.stock === null || Number.isNaN(d.stock)) e.stock = 'El stock es obligatorio';
+    else if (!Number.isInteger(d.stock)) e.stock = 'El stock debe ser un número entero';
+    else if (d.stock < 0) e.stock = 'El stock no puede ser negativo';
+    return e;
+  }
+
+  function errorDeFormulario(e) {
+    if (e && e.tipo === 'red') {
+      mostrarErrores({ general: 'No se pudo conectar con el servidor. Comprueba que la aplicación esté en ejecución.' });
+    } else if (e && e.status === 400 && e.cuerpo && e.cuerpo.errores) {
+      mostrarErrores(e.cuerpo.errores);
+    } else if (e && e.status === 404) {
+      mostrarErrores({ general: 'Este producto ya no existe. Cierra el formulario y actualiza la lista.' });
+      cargar();
+    } else {
+      console.error(e);
+      mostrarErrores({ general: 'No se pudo guardar. Revisa los datos e inténtalo de nuevo.' });
+    }
+  }
+
+  el.form.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    limpiarErrores();
+    const f = el.form.elements;
+    const datos = {
+      nombre: f.nombre.value.trim(),
+      descripcion: f.descripcion.value.trim() || null,
+      precio: f.precio.value === '' ? null : Number(f.precio.value),
+      stock: f.stock.value === '' ? null : Number(f.stock.value),
+    };
+    const locales = validar(datos);
+    if (Object.keys(locales).length) { mostrarErrores(locales); return; }
+
+    const editando = estado.editandoId !== null;
+    const boton = $('#btnGuardar');
+    boton.disabled = true;
+    try {
+      const guardado = await pedir(editando ? `${API}/${estado.editandoId}` : API, {
+        method: editando ? 'PUT' : 'POST',
+        body: JSON.stringify(datos),
+      });
+      if (editando) estado.productos = estado.productos.map((p) => (p.id === guardado.id ? guardado : p));
+      else estado.productos.push(guardado);
+      estado.destacarId = guardado.id;
+      el.dlgForm.close();
+      render();
+      toast(editando ? 'Cambios guardados' : 'Producto creado');
+    } catch (e) {
+      errorDeFormulario(e);
+    } finally {
+      boton.disabled = false;
+    }
+  });
+
+  /* ---------- Eliminar ---------- */
+
+  function pedirBorrado(producto) {
+    estado.borrarId = producto.id;
+    $('#borrarTexto').textContent = `Se eliminará «${producto.nombre}» del inventario. Esta acción no se puede deshacer.`;
+    $('#e-borrar').textContent = '';
+    el.dlgBorrar.showModal();
+  }
+
+  $('#btnConfirmarBorrar').addEventListener('click', async () => {
+    const id = estado.borrarId;
+    const boton = $('#btnConfirmarBorrar');
+    boton.disabled = true;
+    let eliminado = false;
+    try {
+      await pedir(`${API}/${id}`, { method: 'DELETE' });
+      eliminado = true;
+      toast('Producto eliminado');
+    } catch (e) {
+      if (e && e.status === 404) {
+        eliminado = true;
+        toast('Este producto ya no existe');
+      } else {
+        $('#e-borrar').textContent = 'No se pudo eliminar. Comprueba la conexión e inténtalo de nuevo.';
+      }
+    }
+    boton.disabled = false;
+    if (eliminado) {
+      estado.productos = estado.productos.filter((p) => p.id !== id);
+      el.dlgBorrar.close();
+      render();
+    }
+  });
+
+  /* ---------- Eventos de la página ---------- */
+
+  $('#btnNuevo').addEventListener('click', () => abrirForm());
+  $('#btnCancelar').addEventListener('click', () => el.dlgForm.close());
+  $('#btnCancelarBorrar').addEventListener('click', () => el.dlgBorrar.close());
+  $('#btnReintentar').addEventListener('click', cargar);
+
+  [el.dlgForm, el.dlgBorrar].forEach((d) => {
+    d.addEventListener('click', (ev) => { if (ev.target === d) d.close(); });
+  });
+
+  el.buscar.addEventListener('input', () => {
+    estado.q = el.buscar.value;
+    render();
+  });
+
+  document.querySelectorAll('[data-filtro]').forEach((b) => {
+    b.addEventListener('click', () => { estado.filtro = b.dataset.filtro; render(); });
+  });
+
+  document.querySelectorAll('[data-orden]').forEach((b) => {
+    b.addEventListener('click', () => {
+      const campo = b.dataset.orden;
+      if (estado.orden.campo === campo) estado.orden.dir = estado.orden.dir === 'asc' ? 'desc' : 'asc';
+      else estado.orden = { campo, dir: 'asc' };
+      render();
+    });
+  });
+
+  el.resumen.addEventListener('click', (ev) => {
+    if (ev.target.closest('[data-ir="reponer"]')) { estado.filtro = 'reponer'; render(); }
+  });
+
+  el.vacio.addEventListener('click', (ev) => {
+    const b = ev.target.closest('[data-accion]');
+    if (!b) return;
+    if (b.dataset.accion === 'nuevo') abrirForm();
+    if (b.dataset.accion === 'limpiar') {
+      estado.q = '';
+      estado.filtro = 'todos';
+      el.buscar.value = '';
+      render();
+    }
+  });
+
+  el.filas.addEventListener('click', (ev) => {
+    const b = ev.target.closest('button[data-accion]');
+    if (!b) return;
+    const id = Number(b.closest('tr').dataset.id);
+    const producto = estado.productos.find((p) => p.id === id);
+    if (!producto) return;
+    if (b.dataset.accion === 'editar') abrirForm(producto);
+    else pedirBorrado(producto);
+  });
+
+  cargar();
+})();
+</script>
+</body>
+</html>

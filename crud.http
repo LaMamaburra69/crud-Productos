@@ -1,0 +1,30 @@
+### GET request to example server
+GET https://examples.http-client.intellij.net/get
+    ?generated-in=IntelliJ IDEA
+### Crear producto
+POST http://localhost:8080/api/productos
+Content-Type: application/json
+
+{"nombre":"Mouse","descripcion":"Inalambrico","precio":45000,"stock":25}
+
+### Listar productos
+GET http://localhost:8080/api/productos
+
+### Actualizar producto
+PUT http://localhost:8080/api/productos/1
+Content-Type: application/json
+
+{"nombre":"Mouse Pro","descripcion":"Ergonomico","precio":60000,"stock":20}
+
+### Probar validacion (debe responder 400)
+POST http://localhost:8080/api/productos
+Content-Type: application/json
+
+{"nombre":"","precio":-5,"stock":-1}
+
+### Eliminar producto (debe responder 204)
+DELETE http://localhost:8080/api/productos/1
+
+### Producto que no existe (debe responder 404)
+GET http://localhost:8080/api/productos/9999
+###
