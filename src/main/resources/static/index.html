@@ -7,34 +7,34 @@
 <style>
   :root {
     color-scheme: light dark;
-    --bg: #EDF1F2;
-    --surface: #FFFFFF;
-    --ink: #0F1E24;
-    --muted: #586A72;
-    --line: #D5DDE0;
-    --riel: #E1E8EA;
-    --acento: #0E5A6B;
-    --acento-ink: #FFFFFF;
-    --acento-suave: #DCEBEE;
+    --bg: #F4F4EC;
+    --surface: #FFFDF8;
+    --ink: #202D25;
+    --muted: #546356;
+    --line: #DFE4D8;
+    --riel: #E1E9DE;
+    --acento: #245740;
+    --acento-ink: #FFFDF8;
+    --acento-suave: #E2EDE1;
     --aviso: #A84800;
     --aviso-barra: #F08A24;
     --peligro: #B3261E;
     --peligro-suave: #FBE5E3;
-    --titulos: "Bahnschrift", "DIN Alternate", "Arial Narrow", "Segoe UI", system-ui, sans-serif;
+    --titulos: system-ui, -apple-system, "Segoe UI", sans-serif;
     --texto: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
   }
 
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #0D191E;
-      --surface: #14252C;
-      --ink: #E6EEF0;
-      --muted: #93A6AD;
-      --line: #263A41;
-      --riel: #1F343B;
-      --acento: #55B8CD;
-      --acento-ink: #06252C;
-      --acento-suave: #1B3A44;
+      --bg: #101C17;
+      --surface: #192921;
+      --ink: #ECF3E8;
+      --muted: #ABBDAE;
+      --line: #35473B;
+      --riel: #2A3F32;
+      --acento: #B9E4A7;
+      --acento-ink: #152B20;
+      --acento-suave: #2D4635;
       --aviso: #F2A652;
       --aviso-barra: #F2A652;
       --peligro: #F4837B;
@@ -68,51 +68,161 @@
   }
 
   .wrap {
-    max-width: 980px;
+    max-width: 1180px;
     margin: 0 auto;
-    padding: 40px 24px 96px;
+    padding: 48px 28px 96px;
   }
 
-  /* Encabezado */
   .top {
+    position: relative;
+    isolation: isolate;
     display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    gap: 16px 24px;
-    flex-wrap: wrap;
+    align-items: center;
+    min-height: 270px;
+    overflow: hidden;
+    padding: clamp(28px, 6vw, 60px);
+    border-radius: 24px;
+    color: #f7f8ed;
+    background: radial-gradient(ellipse at 88% 10%, #3c6b50, transparent 66%), #183b2d;
   }
 
+  .top-contenido { position: relative; z-index: 1; }
   h1 {
-    margin: 0;
-    font-family: var(--titulos);
-    font-size: clamp(2.1rem, 5vw, 3rem);
-    font-weight: 700;
-    letter-spacing: -0.01em;
-    line-height: 1.05;
+    margin: 0 0 22px;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(2.8rem, 7vw, 5.1rem);
+    font-weight: 400;
+    letter-spacing: -.065em;
+    line-height: .98;
   }
+
+  .top .btn.primario {
+    background: #d9edb3;
+    border-color: #d9edb3;
+    color: #183b2d;
+  }
+  .top .btn.primario:hover { background: #e9f7d3; filter: none; }
+  .top .btn:focus-visible { outline-color: #d9edb3; }
+  .mas { margin-right: 5px; font-size: 1.15em; }
+
+  .estante {
+    position: absolute;
+    right: 6%;
+    bottom: 20%;
+    width: min(34%, 330px);
+    height: 60%;
+    border-bottom: 8px solid #a1be8c;
+    border-radius: 0 0 7px 7px;
+    background: radial-gradient(ellipse at 56% 100%, #8db88b46, transparent 72%);
+  }
+  .estante::before {
+    content: '';
+    position: absolute;
+    inset: -19% -12% 0;
+    z-index: -1;
+    background-image: radial-gradient(#c6e5a657 1px, transparent 1px);
+    background-size: 14px 14px;
+    mask-image: radial-gradient(ellipse at 55% 55%, #000 26%, transparent 73%);
+  }
+  .caja {
+    position: absolute;
+    bottom: 0;
+    width: 38%;
+    height: 54%;
+    border-radius: 8px 8px 3px 3px;
+    background: linear-gradient(90deg, #d8e8a8 76%, #a7c683 76%);
+    box-shadow: 0 5px 17px #102e2355;
+  }
+  .caja::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 26%;
+    width: 24%;
+    height: 36%;
+    border-radius: 0 0 3px 3px;
+    background: #f4f4db;
+  }
+  .caja::after {
+    content: '';
+    position: absolute;
+    inset: auto auto 13% 9%;
+    width: 36%;
+    height: 14%;
+    border-radius: 2px;
+    background: repeating-linear-gradient(90deg, #536c4a 0 2px, transparent 2px 4px), #f5f1de;
+    border: 3px solid #f5f1de;
+  }
+  .caja.izquierda { left: 3%; height: 47%; }
+  .caja.derecha { right: 3%; background: linear-gradient(90deg, #d9a951 76%, #b98838 76%); }
+  .caja.arriba { right: 7%; bottom: 54%; width: 30%; height: 34%; background: linear-gradient(90deg, #e7d6a7 76%, #cdb67e 76%); }
+  .caja.centro { left: 37%; height: 32%; width: 24%; background: linear-gradient(90deg, #8eb69a 76%, #6e987e 76%); }
 
   .resumen {
-    margin: 8px 0 0;
-    color: var(--muted);
-    max-width: 72ch;
-    min-height: 1.5em;
-  }
-  .resumen strong {
-    color: var(--ink);
-    font-variant-numeric: tabular-nums;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin: 20px 0 30px;
   }
 
-  .enlace {
-    background: none;
-    border: 0;
-    padding: 0;
-    font: inherit;
-    font-weight: 600;
-    color: var(--acento);
-    text-decoration: underline;
-    text-underline-offset: 3px;
-    cursor: pointer;
+  .indicador {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 20px 22px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--surface);
+    color: var(--muted);
+    font-size: .875rem;
+    text-align: left;
   }
+
+  button.indicador { width: 100%; font-family: inherit; cursor: pointer; }
+  button.indicador:hover { border-color: var(--aviso); }
+  .indicador strong {
+    color: var(--ink);
+    font-size: clamp(1.25rem, 3.4vw, 1.85rem);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -.04em;
+    overflow-wrap: anywhere;
+  }
+  .indicador strong { line-height: 1.15; }
+  .indicador.reponer strong { color: var(--aviso); }
+  .indicador > span { display: flex; align-items: center; gap: 8px; }
+  .indicador > span::before {
+    content: '';
+    flex: 0 0 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--acento);
+  }
+  .indicador.reponer > span::before { background: var(--aviso-barra); }
+  .indicador.valor > span::before { background: #819950; }
+
+  .catalogo {
+    padding: 22px;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    background: var(--surface);
+    box-shadow: 0 8px 24px rgba(22, 50, 33, .06);
+  }
+  .catalogo h2 { margin: 0; font-size: 1.2rem; letter-spacing: -.025em; }
+  .vacio::before {
+    content: '';
+    display: block;
+    width: 54px;
+    height: 42px;
+    margin: 0 auto 25px;
+    border: 2px solid var(--acento);
+    border-radius: 5px;
+    background:
+      linear-gradient(var(--acento), var(--acento)) center 11px / 100% 2px no-repeat,
+      linear-gradient(var(--acento), var(--acento)) center 21px / 15px 2px no-repeat,
+      var(--acento-suave);
+    box-shadow: 0 0 0 10px var(--acento-suave);
+  }
+  .vacio:has(.vacio-texto)::before { display: none; }
 
   /* Botones */
   .btn {
@@ -148,7 +258,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
-    margin: 28px 0 16px;
+    margin: 14px 0 16px;
   }
 
   input[type="search"],
@@ -165,7 +275,30 @@
   input:focus-visible { outline-offset: 0; border-color: var(--acento); }
   input::placeholder { color: var(--muted); }
 
-  .buscar { flex: 1 1 260px; }
+  .buscar { flex: 1 1 260px; position: relative; }
+  .buscar input { padding-left: 42px; }
+  .buscar::before {
+    content: '';
+    position: absolute;
+    top: 14px;
+    left: 15px;
+    width: 11px;
+    height: 11px;
+    border: 2px solid var(--muted);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+  .buscar::after {
+    content: '';
+    position: absolute;
+    top: 27px;
+    left: 27px;
+    width: 7px;
+    height: 2px;
+    background: var(--muted);
+    transform: rotate(45deg);
+    pointer-events: none;
+  }
 
   .filtros {
     display: inline-flex;
@@ -219,6 +352,7 @@
   table { width: 100%; border-collapse: collapse; }
 
   th {
+    background: var(--bg);
     padding: 12px 16px;
     text-align: left;
     font-size: .875rem;
@@ -249,6 +383,7 @@
     vertical-align: middle;
   }
   tr:last-child td { border-bottom: 0; }
+  tbody tr:hover { background: var(--bg); }
 
   .nombre { display: block; font-weight: 600; }
   .desc {
@@ -280,7 +415,7 @@
     font-variant-numeric: tabular-nums;
   }
   .riel {
-    flex: 0 0 110px;
+    flex: 0 1 80px;
     height: 8px;
     border-radius: 4px;
     background: var(--riel);
@@ -292,9 +427,18 @@
     border-radius: 4px;
     background: var(--acento);
   }
-  .tag { font-size: .8125rem; font-weight: 600; }
+  .tag {
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: var(--acento-suave);
+    color: var(--acento);
+    font-size: .75rem;
+    font-weight: 650;
+    white-space: nowrap;
+  }
   .stock.poco .relleno { background: var(--aviso-barra); }
-  .stock.poco .tag { color: var(--aviso); }
+  .stock.poco .tag { background: var(--bg); color: var(--aviso); }
+  .stock.agotado .tag { background: var(--peligro-suave); }
   .stock.agotado .cant,
   .stock.agotado .tag { color: var(--peligro); }
 
@@ -320,7 +464,7 @@
   tr.destacado td { animation: destello 1.8s ease-out; }
 
   /* Estados vacíos */
-  .vacio { padding: 56px 24px; text-align: center; }
+  .vacio { padding: clamp(38px, 6vw, 68px) 20px; text-align: center; background: var(--bg); }
   .vacio h2 {
     margin: 0 0 6px;
     font-family: var(--titulos);
@@ -398,8 +542,15 @@
   }
 
   /* Móvil: cada fila se convierte en una ficha apilada */
-  @media (max-width: 680px) {
-    .wrap { padding: 28px 16px 80px; }
+  @media (max-width: 780px) {
+    .wrap { padding: 24px 16px 80px; }
+    .top { min-height: 200px; }
+    .estante { width: 34%; height: 48%; right: 6%; }
+    .resumen { margin: 12px 0 20px; }
+    .resumen { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .indicador { padding: 12px 14px; }
+    .indicador.valor { grid-column: 1 / -1; }
+    .catalogo { padding: 14px; }
     thead { display: none; }
     table, tbody { display: block; }
     tr {
@@ -420,6 +571,12 @@
     .filtros button { flex: 1; padding: 0 8px; }
   }
 
+  @media (max-width: 470px) {
+    .top { min-height: 226px; align-items: flex-start; }
+    .estante { width: 31%; height: 32%; bottom: 11%; }
+    .caja::after { display: none; }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation: none !important; transition: none !important; }
   }
@@ -429,44 +586,58 @@
 
 <main class="wrap">
   <header class="top">
-    <div>
+    <div class="top-contenido">
       <h1>Inventario</h1>
-      <p id="resumen" class="resumen" aria-live="polite"></p>
+      <button type="button" id="btnNuevo" class="btn primario"><span class="mas" aria-hidden="true">+</span> Nuevo producto</button>
     </div>
-    <button type="button" id="btnNuevo" class="btn primario">Nuevo producto</button>
+    <div class="estante" aria-hidden="true">
+      <span class="caja izquierda"></span>
+      <span class="caja derecha"></span>
+      <span class="caja arriba"></span>
+      <span class="caja centro"></span>
+    </div>
   </header>
 
-  <div class="barra">
-    <div class="buscar">
-      <label for="q" class="sr">Buscar producto</label>
-      <input id="q" type="search" placeholder="Buscar por nombre o descripción" autocomplete="off">
-    </div>
-    <div class="filtros" role="group" aria-label="Filtrar por stock">
-      <button type="button" data-filtro="todos" aria-pressed="true">Todos</button>
-      <button type="button" data-filtro="reponer" aria-pressed="false">Por reponer</button>
-    </div>
+  <div id="resumen" class="resumen" aria-live="polite" hidden>
+    <div class="indicador"><span>Productos</span><strong id="totalProductos"></strong></div>
+    <button type="button" class="indicador reponer" data-ir="reponer"><span>Por reponer</span><strong id="totalReponer"></strong></button>
+    <div class="indicador valor"><span>Valor del inventario</span><strong id="valorInventario"></strong></div>
   </div>
 
-  <div id="aviso" class="aviso" role="alert" hidden>
-    <span>No se pudo conectar con el servidor. Comprueba que la aplicación siga en ejecución.</span>
-    <button type="button" id="btnReintentar" class="btn">Reintentar</button>
-  </div>
+  <section class="catalogo" aria-labelledby="catalogoTitulo">
+    <h2 id="catalogoTitulo">Productos</h2>
+    <div class="barra">
+      <div class="buscar">
+        <label for="q" class="sr">Buscar producto</label>
+        <input id="q" type="search" placeholder="Buscar productos" autocomplete="off">
+      </div>
+      <div class="filtros" role="group" aria-label="Filtrar por stock">
+        <button type="button" data-filtro="todos" aria-pressed="true">Todos</button>
+        <button type="button" data-filtro="reponer" aria-pressed="false">Por reponer</button>
+      </div>
+    </div>
 
-  <div class="tabla-wrap">
-    <table id="tabla" hidden>
-      <caption class="sr">Lista de productos</caption>
-      <thead>
-        <tr>
-          <th data-col="nombre" aria-sort="ascending"><button type="button" class="orden" data-orden="nombre">Producto <span class="flecha" aria-hidden="true"></span></button></th>
-          <th data-col="precio" class="num" aria-sort="none"><button type="button" class="orden" data-orden="precio">Precio <span class="flecha" aria-hidden="true"></span></button></th>
-          <th data-col="stock" aria-sort="none"><button type="button" class="orden" data-orden="stock">Stock <span class="flecha" aria-hidden="true"></span></button></th>
-          <th><span class="sr">Acciones</span></th>
-        </tr>
-      </thead>
-      <tbody id="filas"></tbody>
-    </table>
-    <div id="vacio" class="vacio" hidden></div>
-  </div>
+    <div id="aviso" class="aviso" role="alert" hidden>
+      <span>No se pudo conectar con el servidor. Comprueba que la aplicación siga en ejecución.</span>
+      <button type="button" id="btnReintentar" class="btn">Reintentar</button>
+    </div>
+
+    <div class="tabla-wrap">
+      <table id="tabla" hidden>
+        <caption class="sr">Lista de productos</caption>
+        <thead>
+          <tr>
+            <th data-col="nombre" aria-sort="ascending"><button type="button" class="orden" data-orden="nombre">Producto <span class="flecha" aria-hidden="true"></span></button></th>
+            <th data-col="precio" class="num" aria-sort="none"><button type="button" class="orden" data-orden="precio">Precio <span class="flecha" aria-hidden="true"></span></button></th>
+            <th data-col="stock" aria-sort="none"><button type="button" class="orden" data-orden="stock">Stock <span class="flecha" aria-hidden="true"></span></button></th>
+            <th><span class="sr">Acciones</span></th>
+          </tr>
+        </thead>
+        <tbody id="filas"></tbody>
+      </table>
+      <div id="vacio" class="vacio" hidden></div>
+    </div>
+  </section>
 </main>
 
 <!-- Crear y editar -->
@@ -629,17 +800,14 @@
   }
 
   function renderResumen() {
-    if (estado.cargando) { el.resumen.textContent = 'Cargando productos…'; return; }
-    if (estado.error) { el.resumen.textContent = ''; return; }
-    const n = estado.productos.length;
-    if (n === 0) { el.resumen.textContent = 'Todavía no has registrado productos.'; return; }
+    el.resumen.hidden = estado.cargando || estado.error;
+    if (el.resumen.hidden) return;
+
     const valor = estado.productos.reduce((suma, p) => suma + p.precio * p.stock, 0);
     const reponer = estado.productos.filter((p) => p.stock <= POCO_STOCK).length;
-    let html = `<strong>${n}</strong> ${n === 1 ? 'producto' : 'productos'} en inventario, valorados en <strong>${esc(moneda.format(valor))}</strong>.`;
-    if (reponer > 0) {
-      html += ` Hay <button type="button" class="enlace" data-ir="reponer">${reponer} ${reponer === 1 ? 'producto' : 'productos'} por reponer</button>.`;
-    }
-    el.resumen.innerHTML = html;
+    $('#totalProductos').textContent = estado.productos.length;
+    $('#totalReponer').textContent = reponer;
+    $('#valorInventario').textContent = moneda.format(valor);
   }
 
   function renderFiltros() {
@@ -658,7 +826,7 @@
   function filaHTML(p, maxStock) {
     const pct = Math.min(100, Math.round((p.stock / maxStock) * 100));
     let clase = '';
-    let etiqueta = '';
+    let etiqueta = 'Disponible';
     if (p.stock === 0) { clase = 'agotado'; etiqueta = 'Agotado'; }
     else if (p.stock <= POCO_STOCK) { clase = 'poco'; etiqueta = 'Poco stock'; }
     const nombre = esc(p.nombre);
@@ -673,7 +841,7 @@
           <div class="stock ${clase}">
             <span class="cant">${p.stock}</span>
             <span class="riel" aria-hidden="true"><span class="relleno" style="width:${pct}%"></span></span>
-            ${etiqueta ? `<span class="tag">${etiqueta}</span>` : ''}
+            <span class="tag">${etiqueta}</span>
           </div>
         </td>
         <td class="c-acc">
