@@ -1,0 +1,22 @@
+services:
+  db:
+    ports: !override
+      - "127.0.0.1:3307:3306"
+  app:
+    ports: !override
+      - "127.0.0.1:8080:8080"
+  categorias:
+    build: ../crud-Categorias
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: mysql
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: productosdb
+      DB_USER: ${DB_USER:-productos}
+      DB_PASSWORD: ${DB_PASSWORD:-productos123}
+    ports:
+      - "127.0.0.1:8081:8080"
+    restart: unless-stopped
